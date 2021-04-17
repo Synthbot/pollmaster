@@ -11,8 +11,10 @@ class DiscordBotsOrgAPI(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.token = SETTINGS.dbl_token
-        self.dblpy = dbl.DBLClient(self.bot, self.token)
+        if SETTINGS.mode != "development":
+            self.token = SETTINGS.dbl_token
+            self.dblpy = dbl.DBLClient(self.bot, self.token)
+            self.update_stats.start()
 
     @tasks.loop(minutes=30.0)
     async def update_stats(self):

@@ -3,6 +3,7 @@ import datetime
 import logging
 import shlex
 import time
+from string import ascii_lowercase
 
 import discord
 import pytz
@@ -27,6 +28,7 @@ class PollControls(commands.Cog):
         self.bot = bot
         self.ignore_next_removed_reaction = {}
         self.index = 0
+        self.close_activate_polls.add_exception_type(KeyError)
         self.close_activate_polls.start()
 
     def cog_unload(self):
@@ -52,6 +54,8 @@ class PollControls(commands.Cog):
 
                     # load poll (this will close the poll if necessary and update the DB)
                     p = Poll(self.bot, load=True)
+                    if not p:
+                        continue
                     await p.from_dict(pd)
 
                     # Check if Pollmaster is still present on the server
@@ -145,7 +149,7 @@ class PollControls(commands.Cog):
                 return True
             else:
                 if error_msg is not None:
-                    await ctx.send(ctx.message.author, error_msg)
+                    await ctx.message.author.send(error_msg)
                 return False
 
     async def say_error(self, ctx, error_text, footer_text=None):
@@ -182,7 +186,7 @@ class PollControls(commands.Cog):
         if short is None:
             pre = await get_server_pre(self.bot, ctx.message.guild)
             error = f'Please specify the label of a poll after the activate command. \n' \
-                f'`{pre}activate <poll_label>`'
+                    f'`{pre}activate <poll_label>`'
             await self.say_error(ctx, error)
         else:
             p = await Poll.load_from_db(self.bot, server.id, short)
@@ -218,7 +222,7 @@ class PollControls(commands.Cog):
         if short is None:
             pre = await get_server_pre(self.bot, ctx.message.guild)
             error = f'Please specify the label of a poll after the delete command. \n' \
-                f'`{pre}delete <poll_label>`'
+                    f'`{pre}delete <poll_label>`'
             await self.say_error(ctx, error)
         else:
             p = await Poll.load_from_db(self.bot, server.id, short)
@@ -239,7 +243,7 @@ class PollControls(commands.Cog):
                     await self.say_embed(ctx, say, title)
                 else:
                     error = f'Action failed. Poll could not be deleted. ' \
-                        f'You should probably report his error to the dev, thanks!'
+                            f'You should probably report his error to the dev, thanks!'
                     await self.say_error(ctx, error)
 
             else:
@@ -258,7 +262,7 @@ class PollControls(commands.Cog):
         if short is None:
             pre = await get_server_pre(self.bot, ctx.message.guild)
             error = f'Please specify the label of a poll after the close command. \n' \
-                f'`{pre}close <poll_label>`'
+                    f'`{pre}close <poll_label>`'
             await self.say_error(ctx, error)
         else:
             p = await Poll.load_from_db(self.bot, server.id, short)
@@ -292,7 +296,7 @@ class PollControls(commands.Cog):
         if short is None:
             pre = await get_server_pre(self.bot, ctx.message.guild)
             error = f'Please specify the label of a poll after the copy command. \n' \
-                f'`{pre}copy <poll_label>`'
+                    f'`{pre}copy <poll_label>`'
             await self.say_error(ctx, error)
 
         else:
@@ -317,7 +321,7 @@ class PollControls(commands.Cog):
         if short is None:
             pre = await get_server_pre(self.bot, ctx.message.guild)
             error = f'Please specify the label of a poll after the export command. \n' \
-                f'`{pre}export <poll_label>`'
+                    f'`{pre}export <poll_label>`'
             await self.say_error(ctx, error)
         else:
             p = await Poll.load_from_db(self.bot, server.id, short)
@@ -325,7 +329,7 @@ class PollControls(commands.Cog):
                 if p.open:
                     pre = await get_server_pre(self.bot, ctx.message.guild)
                     error_text = f'You can only export closed polls. \n' \
-                        f'Please `{pre}close {short}` the poll first or wait for the deadline.'
+                                 f'Please `{pre}close {short}` the poll first or wait for the deadline.'
                     await self.say_error(ctx, error_text)
                 else:
                     # sending file
@@ -411,7 +415,7 @@ class PollControls(commands.Cog):
             # generate the argparser and handle invalid stuff
             descr = 'Accept poll settings via commandstring. \n\n' \
                     '**Wrap all arguments in quotes like this:** \n' \
-                f'{pre}cmd -question \"What tea do you like?\" -o \"green, black, chai\"\n\n' \
+                    f'{pre}cmd -question \"What tea do you like?\" -o \"green, black, chai\"\n\n' \
                     'The Order of arguments doesn\'t matter. If an argument is missing, it will use the default value. ' \
                     'If an argument is invalid, the wizard will step in. ' \
                     'If the command string is invalid, you will get this error :)'
@@ -437,10 +441,10 @@ class PollControls(commands.Cog):
                 return
 
             try:
-                print(cmd)
+                # print(cmd)
                 cmd = cmd.replace('“', '"')  # fix for iphone keyboard
                 cmd = cmd.replace('”', '"')  # fix for iphone keyboard
-                print(cmd)
+                # print(cmd)
                 cmds = shlex.split(cmd)
             except ValueError:
                 await self.say_error(ctx, error_text=helpstring)
@@ -458,9 +462,9 @@ class PollControls(commands.Cog):
 
             if unknown_args:
                 error_text = f'**There was an error reading the command line options!**.\n' \
-                    f'Most likely this is because you didn\'t surround the arguments with double quotes like this: ' \
-                    f'`{pre}cmd -q "question of the poll" -o "yes, no, maybe"`' \
-                    f'\n\nHere are the arguments I could not understand:\n'
+                             f'Most likely this is because you didn\'t surround the arguments with double quotes like this: ' \
+                             f'`{pre}cmd -q "question of the poll" -o "yes, no, maybe"`' \
+                             f'\n\nHere are the arguments I could not understand:\n'
                 error_text += '`' + '\n'.join(unknown_args) + '`'
                 error_text += f'\n\nHere are the arguments which are ok:\n'
                 error_text += '`' + '\n'.join([f'{k}: {v}' for k, v in vars(args).items()]) + '`'

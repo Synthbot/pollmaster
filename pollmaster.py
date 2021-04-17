@@ -16,6 +16,7 @@ from essentials.settings import SETTINGS
 
 bot_config = {
     'command_prefix': get_pre,
+    'case_insensitive': True,
     'pm_help': False,
     'status': discord.Status.online,
     'owner_id': SETTINGS.owner_id,
@@ -36,7 +37,7 @@ logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
 # create file handler which logs even debug messages
 fh = logging.FileHandler('pollmaster.log',  encoding='utf-8', mode='w')
-fh.setLevel(logging.DEBUG)
+fh.setLevel(logging.INFO)
 # create console handler with a higher log level
 ch = logging.StreamHandler()
 ch.setLevel(logging.ERROR)
@@ -51,6 +52,24 @@ logger.addHandler(ch)
 extensions = ['cogs.config', 'cogs.poll_controls', 'cogs.help', 'cogs.db_api', 'cogs.admin']
 for ext in extensions:
     bot.load_extension(ext)
+
+
+@bot.event
+async def on_message(message):
+    # allow case insensitive prefix
+    prefix = await get_pre(bot, message)
+    if type(prefix) == tuple:
+        prefixes = (t.lower() for t in prefix)
+        for pfx in prefixes:
+            if len(pfx) >= 1 and message.content.lower().startswith(pfx.lower()):
+                # print("Matching", message.content, "with", pfx)
+                message.content = pfx + message.content[len(pfx):]
+                await bot.process_commands(message)
+                break
+    else:
+        if message.content.lower().startswith(prefix.lower()):
+            message.content = prefix + message.content[len(prefix):]
+            await bot.process_commands(message)
 
 
 @bot.event
@@ -81,7 +100,7 @@ async def on_ready():
         print("Problem verifying servers.")
 
     # cache prefixes
-    bot.pre = {entry['_id']: entry['prefix'] async for entry in bot.db.config.find({}, {'_id', 'prefix'})}
+    bot.pre = {entry['_id']: entry.get('prefix', 'pm!') async for entry in bot.db.config.find({}, {'_id', 'prefix'})}
 
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="pm!help"))
 

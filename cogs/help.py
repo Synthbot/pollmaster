@@ -209,21 +209,23 @@ class Help(commands.Cog):
 
         elif page == '💖':
             embed.add_field(name='💖 Pollmaster 💖',
-                            value='If you enjoy the bot, you can show your appreciation by giving him an upvote on Discordbots.',
+                            value='If you enjoy the bot, you can show your appreciation by giving it an upvote on Discordbots.',
                             inline=False)
             embed.add_field(name='🔹 **Developer**',
-                            value='Pollmaster is developed by Newti#0654',
+                            value='Pollmaster is modified by Synthbot\n'
+                                  'Originally created by Newti#0654',
                             inline=False)
             embed.add_field(name='🔹 **Support**',
-                            value='You can support Pollmaster by sending an upvote his way or by clicking the donate link '
+                            value='You can support Pollmaster by sending an upvote its way or by clicking the donate link '
                                   'on the discordbots page:\n https://discordbots.org/bot/444514223075360800',
                             inline=False)
             embed.add_field(name='🔹 **Support Server**',
-                            value='If you need help with pollmaster, want to try him out or would like to give feedback '
+                            value='If you need help with pollmaster, want to try it out or would like to give feedback '
                                   'to the developer, feel free to join the support server: https://discord.gg/Vgk8Nve',
                             inline=False)
             embed.add_field(name='🔹 **Github**',
-                            value='The full python source code is on my Github: https://github.com/matnad/pollmaster',
+                            value='The forked source code is on my Github: https://github.com/Synthbot/pollmaster '
+                                  'and the original code is https://github.com/matnad/pollmaster',
                             inline=False)
             embed.add_field(name='**Thanks for using Pollmaster!** 💗', value='Newti', inline=False)
         else:
@@ -263,78 +265,84 @@ class Help(commands.Cog):
         if message.author == self.bot.user:
             return
 
-        if message.content.startswith("@mention"):
-            channel = message.channel
-            if not isinstance(channel, discord.TextChannel):
-                await channel.send("@mention can only be used in a server text channel.")
-                return
+        if message.content.startswith(f"<@!{self.bot.user.id}>"):
+            print(message.content)
+            print(self.bot.user.name)
 
-            guild = message.guild
-            if not guild:
-                await channel.send("Could not determine your server.")
-                return
+            if message.content.startswith(f"<@!{self.bot.user.id}> mention"):
+                channel = message.channel
+                if not isinstance(channel, discord.TextChannel):
+                    await channel.send("@mention can only be used in a server text channel.")
+                    return
 
-            if message.content == "@mention":
-                await channel.send("The following @mention tags are available:\n🔹 @mention prefix")
-                return
+                guild = message.guild
+                if not guild:
+                    await channel.send("Could not determine your server.")
+                    return
 
-            try:
-                tag = message.content.split()[1].lower()
-            except IndexError:
-                await channel.send("Wrong formatting. Type \"@mention\" or \"@mention <tag>\".")
-                return
+                if message.content == f"<@!{self.bot.user.id}> mention":
+                    await channel.send("The following mention tags are available:\n🔹 mention prefix")
+                    return
 
-            if tag == "prefix":
-                pre = await get_server_pre(self.bot, guild)
-                # await channel.send(f'The prefix for this server/channel is: \n {pre} \n To change it type: \n'
-                #                    f'{pre}prefix <new_prefix>')
-                await channel.send(pre)
-            else:
-                await channel.send(f'Tag "{tag}" not found. Type "@mention" for a list of tags.')
+                try:
+                    tags = message.content.split()
+                    tag = tags[len(tags)-1].lower()
+                except IndexError:
+                    await channel.send(f"Wrong formatting. Type \"@{self.bot.user.name} mention\" or "
+                                       f"\"@{self.bot.user.name} mention <tag>\".")
+                    return
 
-        elif message.content == "@debug":
-            channel = message.channel
-            if not isinstance(channel, discord.TextChannel):
-                await channel.send("@debug can only be used in a server text channel.")
-                return
+                if tag == "prefix":
+                    pre = await get_server_pre(self.bot, guild)
+                    # await channel.send(f'The prefix for this server/channel is: \n {pre} \n To change it type: \n'
+                    #                    f'{pre}prefix <new_prefix>')
+                    await channel.send(pre)
+                else:
+                    await channel.send(f'Tag "{tag}" not found. Type `@{self.bot.user.name} mention` for a list of tags.')
 
-            guild = message.guild
-            if not guild:
-                await channel.send("Could not determine your server.")
-                return
+            if message.content.startswith(f"<@!{self.bot.user.id}> debug"):
+                channel = message.channel
+                if not isinstance(channel, discord.TextChannel):
+                    await channel.send("`debug` can only be used in a server text channel.")
+                    return
 
-            status_msg = ''
-            setup_correct = True
+                guild = message.guild
+                if not guild:
+                    await channel.send("Could not determine your server. Run the command in a server text channel.")
+                    return
 
-            # check send message permissions
-            permissions = channel.permissions_for(guild.me)
-            if not permissions.send_messages:
-                await message.author.send(f'I don\'t have permission to send text messages in channel "{channel}" '
-                                          f'on server "{guild}"')
-                return
+                status_msg = ''
+                setup_correct = True
 
-            status_msg += ' ✅ Sending text messages\n'
+                # check send message permissions
+                permissions = channel.permissions_for(guild.me)
+                if not permissions.send_messages:
+                    await message.author.send(f'I don\'t have permission to send text messages in channel "{channel}" '
+                                              f'on server "{guild}"')
+                    return
 
-            # check embed link permissions
-            if permissions.embed_links:
-                status_msg += '✅ Sending embedded messages\n'
-            else:
-                status_msg += '❗ Sending embedded messages. I need permissions to embed links!\n'
-                setup_correct = False
+                status_msg += ' ✅ Sending text messages\n'
 
-            # check manage messages
-            if permissions.manage_messages:
-                status_msg += '✅ Deleting messages and reactions\n'
-            else:
-                status_msg += '❗ Deleting messages and reactions. I need the manage messages permission!\n'
-                setup_correct = False
+                # check embed link permissions
+                if permissions.embed_links:
+                    status_msg += '✅ Sending embedded messages\n'
+                else:
+                    status_msg += '❗ Sending embedded messages. I need permissions to embed links!\n'
+                    setup_correct = False
 
-            # check adding reactions
-            if permissions.add_reactions:
-                status_msg += '✅ Adding reactions\n'
-            else:
-                status_msg += '❗ Adding reactions. I need the add reactions permission!\n'
-                setup_correct = False
+                # check manage messages
+                if permissions.manage_messages:
+                    status_msg += '✅ Deleting messages and reactions\n'
+                else:
+                    status_msg += '❗ Deleting messages and reactions. I need the manage messages permission!\n'
+                    setup_correct = False
+
+                # check adding reactions
+                if permissions.add_reactions:
+                    status_msg += '✅ Adding reactions\n'
+                else:
+                    status_msg += '❗ Adding reactions. I need the add reactions permission!\n'
+                    setup_correct = False
 
             if setup_correct:
                 status_msg += 'No action required. Your permissions are set up correctly for this channel. \n' \
