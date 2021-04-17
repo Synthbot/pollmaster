@@ -50,6 +50,8 @@ Servers verified. Bot running.
 
 > &permissions=1073867840
 
+> https://discordapp.com/api/oauth2/authorize?client_id=833040324800544839&permissions=1073867840&scope=bot
+
 - Now you will see the bot in your Discord channel
 - Try commands like pm!help and pm!new
 

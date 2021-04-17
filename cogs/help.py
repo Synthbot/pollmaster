@@ -209,21 +209,23 @@ class Help(commands.Cog):
 
         elif page == '💖':
             embed.add_field(name='💖 Pollmaster 💖',
-                            value='If you enjoy the bot, you can show your appreciation by giving him an upvote on Discordbots.',
+                            value='If you enjoy the bot, you can show your appreciation by giving it an upvote on Discordbots.',
                             inline=False)
             embed.add_field(name='🔹 **Developer**',
-                            value='Pollmaster is developed by Newti#0654',
+                            value='Pollmaster is modified by Synthbot\n'
+                                  'Originally created by Newti#0654',
                             inline=False)
             embed.add_field(name='🔹 **Support**',
-                            value='You can support Pollmaster by sending an upvote his way or by clicking the donate link '
+                            value='You can support Pollmaster by sending an upvote its way or by clicking the donate link '
                                   'on the discordbots page:\n https://discordbots.org/bot/444514223075360800',
                             inline=False)
             embed.add_field(name='🔹 **Support Server**',
-                            value='If you need help with pollmaster, want to try him out or would like to give feedback '
+                            value='If you need help with pollmaster, want to try it out or would like to give feedback '
                                   'to the developer, feel free to join the support server: https://discord.gg/Vgk8Nve',
                             inline=False)
             embed.add_field(name='🔹 **Github**',
-                            value='The full python source code is on my Github: https://github.com/matnad/pollmaster',
+                            value='The forked source code is on my Github: https://github.com/Synthbot/pollmaster '
+                                  'and the original code is https://github.com/matnad/pollmaster',
                             inline=False)
             embed.add_field(name='**Thanks for using Pollmaster!** 💗', value='Newti', inline=False)
         else:
