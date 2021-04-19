@@ -6,7 +6,7 @@ import aiohttp
 import discord
 import logging
 
-
+from bypass.generate_poll import generate_poll
 from essentials.messagecache import MessageCache
 from discord.ext import commands
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -56,6 +56,10 @@ for ext in extensions:
 
 @bot.event
 async def on_message(message):
+    # I'm just gonna bypass all of this to try to make a poll from a message
+    await generate_poll(message)
+
+    """
     # allow case insensitive prefix
     prefix = await get_pre(bot, message)
     if type(prefix) == tuple:
@@ -70,6 +74,7 @@ async def on_message(message):
         if message.content.lower().startswith(prefix.lower()):
             message.content = prefix + message.content[len(prefix):]
             await bot.process_commands(message)
+    """
 
 
 @bot.event
