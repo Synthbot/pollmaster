@@ -1,3 +1,8 @@
 on_message(message) [pollmaster line 58] handles *all* messages that the bot can see
     message.content is the text content of the message
-    
+
+pm!new routes to cogs\poll_contros.py line 641
+
+Poll object found in models\poll.py
+
+server.get_member(member_id) seems to be broken for some reason. 825 of poll controls specifically.

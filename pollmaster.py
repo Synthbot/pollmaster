@@ -57,7 +57,7 @@ for ext in extensions:
 @bot.event
 async def on_message(message):
     # I'm just gonna bypass all of this to try to make a poll from a message
-    await generate_poll(message)
+    await generate_poll(message, bot)
 
     """
     # allow case insensitive prefix
